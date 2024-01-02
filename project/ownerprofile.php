@@ -31,7 +31,7 @@
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div class="d-flex flex-row align-items-center back">
                             <i class="fa fa-long-arrow-left mr-1 mb-1"></i>
-                            <h6><a href="home.html">Back to home</a></h6>
+                            <h6><a href="home.php">Back to home</a></h6>
                         </div>
                      <h6 class="text-right"><button>Edit Profile</button></h6>
                     </div>
@@ -90,7 +90,7 @@
         function addRow() {
             var tableBody = document.querySelector('#tableSection tbody');
             var newRow = document.createElement('tr');
-            newRow.innerHTML = `
+            newRow.innerphp = `
                 <th scope="row">${tableBody.children.length + 1}</th>
                 <td>New Station</td>
                 <td>5</td>

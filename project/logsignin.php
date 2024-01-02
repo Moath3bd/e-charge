@@ -9,12 +9,12 @@
 <body>
     <header>
         <nav>
-            <div><a class="logo" href="home.html">EVehicles</a> </div>
+            <div><a class="logo" href="home.php">EVehicles</a> </div>
             <ul>
-                <li><a href="home.html">Home</a></li>
-                <li><a href="vehicles.html">Vehicles</a></li>
-                <li><a href="chargestation.html">Charging Stations</a></li>
-                <li><a href="contact.html">Contact</a></li>
+                <li><a href="home.php">Home</a></li>
+                <li><a href="vehicles.php">Vehicles</a></li>
+                <li><a href="chargestation.php">Charging Stations</a></li>
+                <li><a href="contact.php">Contact</a></li>
             </ul>
         </nav>
     </header>
