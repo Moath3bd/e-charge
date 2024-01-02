@@ -1,3 +1,109 @@
+<?php
+// Handle registration form submission
+require_once 'database.php';
+$successMessage = '';
+$errorMessage = ""; // Initialize error message variable
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'], $_POST['name'], $_POST['password1'], $_POST['password2'])) {
+    $email = $_POST['email'];
+    $name = $_POST['name'];
+    $password1 = $_POST['password1'];
+    $password2 = $_POST['password2'];
+
+    // Validate form data
+    $errors = array();
+    if ($password1 !== $password2) {
+        $errors[] = 'Passwords do not match.';
+    }
+    // Validate username: must consist of letters only
+    if (!preg_match('/^[a-zA-Z]+$/', $name)) {
+        $errors[] = 'Username must consist of letters only.';
+    }
+
+    // Validate email: must end with @, then any name, then .com
+    if (!preg_match('/^.*@.*\.com$/', $email)) {
+        $errors[] = 'Invalid email format.';
+    }
+
+    // Validate password: at least 8 characters long, contains a capital letter and any symbol
+    if (strlen($password1) < 8 || !preg_match('/[A-Z]/', $password1) || !preg_match('/[^a-zA-Z0-9]/', $password1) || !preg_match('/[!@#$%^&*()\-_=+{};:,<.>]/', $password1)) {
+        $errors[] = 'Password must be at least 8 characters long and contain a capital letter and any symbol.';
+    }
+
+    if (count($errors) === 0) {
+        $stmt = $connection->prepare('SELECT * FROM users WHERE email = ?');
+        $stmt->bind_param('s', $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            $errorMessage = 'User with the same email already exists.';
+        } else {
+        // Hash the password
+        $hashedPassword = password_hash($password1, PASSWORD_DEFAULT);
+
+        // Prepare and bind the insert statement
+        $stmt = $connection->prepare('INSERT INTO users (email, name, password) VALUES (?, ?, ?)');
+        $stmt->bind_param('sss', $email, $name, $hashedPassword);
+
+        // Execute the statement
+        if ($stmt->execute()) {
+            // Registration successful
+            $successMessage = 'Registration successful!';
+        } else {
+            // Error occurred during registration
+            $errorMessage = 'Error: ' . $stmt->error;
+        }
+    }
+    } else {
+        // Display validation errors
+        foreach ($errors as $error) {
+            $errorMessage .= $error . '<br>';
+        }
+    }
+}
+
+// Handle login form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'], $_POST['password'])) {
+    // Login form handling
+    $loginEmail = $_POST['email'];
+    $loginPassword = $_POST['password'];
+
+    // Prepare and bind the select statement
+    $stmt = $connection->prepare('SELECT * FROM users WHERE email = ?');
+    $stmt->bind_param('s', $loginEmail);
+
+    // Execute the statement
+    if ($stmt->execute()) {
+        // Get the result
+        $result = $stmt->get_result();
+
+        // Check if the user exists
+        if ($result->num_rows === 1) {
+            // User exists, verify the password
+            $row = $result->fetch_assoc();
+            $hashedPassword = $row['password'];
+            if (password_verify($loginPassword, $hashedPassword)) {
+                // Password is correct, login successful
+                $successMessage = 'Login successful!';
+                // Redirect or perform any necessary actions
+                // For example, you can redirect to a dashboard page:
+                header('Location: home.php');
+                exit();
+            } else {
+                // Password is incorrect
+                $errorMessage = 'Invalid password.';
+            }
+        } else {
+            // User does not exist
+            $errorMessage = 'Invalid email.';
+        }
+    } else {
+        // Error occurred during execution
+        $errorMessage = 'Error: ' . $stmt->error;
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,8 +140,8 @@
                   <input id="login-email" type="email" required>
                 </div>
                 <div class="input-block">
-                  <label for="login-password">Password</label>
-                  <input id="login-password" type="password" required>
+                  <label for="password">Password</label>
+                  <input id="password" type="password" required>
                 </div>
               </fieldset>
               <button type="submit" class="btn-login">Login</button>
@@ -54,16 +160,16 @@
                   <input id="signup-email" type="text" required>
                 </div>
                 <div class="input-block">
-                  <label for="signup-email">E-mail</label>
-                  <input id="signup-email" type="email" required>
+                  <label for="email">E-mail</label>
+                  <input id="email" type="email" required>
                 </div>
                 <div class="input-block">
-                  <label for="signup-password">Password</label>
-                  <input id="signup-password" type="password" required>
+                  <label for="password1">Password</label>
+                  <input id="password1" type="password" required>
                 </div>
                 <div class="input-block">
-                    <label for="signup-password">Confirm Password</label>
-                    <input id="signup-password" type="password" required>
+                    <label for="password2">Confirm Password</label>
+                    <input id="password2" type="password" required>
                   </div>
               </fieldset>
               <button type="submit" class="btn-signup">Sign Up</button>
