@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -179,9 +178,13 @@
             $errorMessage = 'Error: ' . $stmt->error;
         }
     }
+    require_once 'database.php'; // Adjust the filename as needed
     ?>
-  
 
     <script src="javascript.js"></script>
 </body>
 </html>
+
+
+    
+  
